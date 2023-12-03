@@ -1,57 +1,68 @@
 const readline = require('readline')
 const fs = require('fs')
 
-let sumOfPossibleIds = 0
+let sumOfPowers = 0
 
 const readInterface = readline.createInterface({
   input: fs.createReadStream('day2input.txt'),
   console: false,
 })
-//max 12 red, 13 green, 14 blue
+
 readInterface.on('line', function (line) {
   console.log(line)
   let gameId = parseInt(getId(line))
   console.log('Game ID: ', gameId)
   const round = line.split(/[:;]/)
   round.splice(0, 1)
-  // console.log(round)
-  if (isGameValid(round)) {
-    sumOfPossibleIds = sumOfPossibleIds + gameId
-  }
 
-  console.log(`Sum of possible game Ids: ${sumOfPossibleIds}\n`)
+  const allSetsPerRound = assembleSets(round)
+  let roundPower = getPower(allSetsPerRound)
+  console.log(`Round power: ${roundPower}`)
+  sumOfPowers = sumOfPowers + roundPower
   console.log(
-    '--------------------------------------------------------------------'
+    `Sum of powers: ${sumOfPowers}\n-----------------------------------------------------------------\n`
   )
+
+  function assembleSets(round) {
+    const sets = []
+    for (let i = 0; i < round.length; i++) {
+      let set = round[i].split(',')
+      for (let j = 0; j < set.length; j++) {
+        sets.push(set[j].trim())
+      }
+    }
+    console.log(sets)
+    return sets
+  }
 
   function getId(line) {
     return line.split(' ')[1].split(':')[0]
   }
 
-  function isGameValid(round) {
-    for (let i = 0; i < round.length; i++) {
-      const sets = round[i].split(',')
-      console.log(`\nsets: ${sets}`)
-      for (let i = 0; i < sets.length; i++) {
-        const set = sets[i].split(',')
-
-        for (let i = 0; i < set.length; i++) {
-          let colour = set[i].split(' ')[2]
-          let number = parseInt(set[i].split(' ')[1])
-          if (
-            (colour == 'red' && number > 12) ||
-            (colour == 'blue' && number > 14) ||
-            (colour == 'green' && number > 13)
-          ) {
-            console.log('Game is not valid')
-            return false
-          } else {
-            console.log(`${number} ${colour} is valid`)
-          }
+  function getPower(allSets) {
+    let minRed = 0
+    let minGreen = 0
+    let minBlue = 0
+    for (let i = 0; i < allSets.length; i++) {
+      let colour = allSets[i].split(' ')[1]
+      let number = parseInt(allSets[i].split(' ')[0])
+      if (colour == 'red') {
+        if (number > minRed) {
+          minRed = number
+        }
+      } else if (colour == 'blue') {
+        if (number > minBlue) {
+          minBlue = number
+        }
+      } else if (colour == 'green') {
+        if (number > minGreen) {
+          minGreen = number
         }
       }
     }
-    console.log('Game is valid')
-    return true
+    console.log(
+      `Minimum reds needed: ${minRed}\nMinimum greens needed: ${minGreen}\nMinimum blues needed: ${minBlue}\n`
+    )
+    return minRed * minBlue * minGreen
   }
 })
