@@ -1,4 +1,3 @@
-
 const fs = require('fs')
 
 const filename = 'sample.txt'
@@ -9,11 +8,12 @@ const lines = data.split(/\n/)
 const seeds = lines[0].split(' ')
 seeds.splice(0, 1)
 console.log(seeds)
-const totalLines = lines.length - 2
+const totalLines = lines.length
 let lineCount = 3
 while (lineCount < totalLines) {
   const currentLine = lines[lineCount]
   if (currentLine.includes('map')) {
+    for (let i )
     seeds = runMapping(seeds, currentLine)
   } else if (currentLine == '') {
     continue
@@ -28,8 +28,8 @@ function runMapping(seeds, line) {
 
   for (let i = 0; i < seeds.length; i++) {
     const seed = seeds[i]
-  //  if (!seed.includes("m") && seed >= sourceRangeStart && seed < sourceRangeStart + rangeLength) {
-      let newSeed = destinationRangeStart + (seed - sourceRangeStart) + "m"
+    if (seed >= sourceRangeStart && seed < sourceRangeStart + rangeLength) {
+      let newSeed = destinationRangeStart + (seed - sourceRangeStart) + 'm'
       mappedSeeds.push(newSeed)
     } else {
       mappedSeed

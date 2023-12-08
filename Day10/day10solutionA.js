@@ -13,13 +13,8 @@ console.log(`Starting X coord: ${x}, starting Y coord: ${y}`)
 
 function findPipe(grid, y, x) {
   // check top
-  if (grid[y + 1][x] == "|") {
-    
+  if (grid[y + 1][x] == '|') {
   }
-}
-
-function move(grid, y, x) {
-  for let i = 
 }
 
 function findStart(grid) {
@@ -29,6 +24,25 @@ function findStart(grid) {
         return [i, j]
       }
     }
+  }
+}
+
+function determineStartPipe(grid, y, x) {
+  const up = grid[y + 1][x]
+  const left = grid[y][x - 1]
+  const right = grid[y][x + 1]
+  const down = grid[y - 1][x]
+
+  if (
+    (up == '|' || up == 'F' || up == '7') &&
+    (left == '-' || left == 'J' || left == '7')
+  ) {
+    return 'L'
+  } else if (
+    (up == '|' || up == 'F' || up == '7') &&
+    (left == '-' || left == 'J' || left == '7')
+  ) {
+    return ''
   }
 }
 
