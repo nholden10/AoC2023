@@ -1,70 +1,214 @@
 const fs = require('fs')
 
-const filename = 'day9input.txt'
+const filename = 'sample3.txt'
 const data = fs.readFileSync(filename, 'utf8')
 
 const dataset = data.split(/\n/)
 
-const histories = []
+const grid = initializeGrid(dataset)
+//console.log(grid)
 
-let sumOfExtrapolatedHistories = 0
+const [y, x] = findStart(grid)
+const [startPipe, dir_x, dir_y] = determineStartPipe(grid, y, x)
+console.log(
+  `Starting X coord: ${x}, starting Y coord: ${y}\nStarting pipe is a ${startPipe}`
+)
 
-for (let i = 0; i < dataset.length; i++) {
-  histories.push(dataset[i].split(' '))
-  console.log(`History ${i + 1}: ${histories[i]}`)
+const newGrid = makeLoop(grid, y, x, startPipe, dir_y, dir_x)
+console.log('Loop made')
+const [innerSpaces, filledGrid] = countInnerSpaces(newGrid)
+
+printGrid(filledGrid)
+
+console.log(`Total inner spaces: ${innerSpaces}`)
+
+function printGrid(grid) {
+  for (let i = 0; i < grid.length; i++) {
+    console.log(grid[i].join())
+  }
 }
-console.log('\n')
 
-for (let i = 0; i < histories.length; i++) {
-  const history = histories[i]
-  console.log(`History ${i + 1}: ${history}`)
-  const rows = []
-  rows.push(history)
-  let count = 0
+function countInnerSpaces(newGrid) {
+  let innerSpaces = 0
+  for (let i = 0; i < newGrid.length; i++) {
+    for (let j = 0; j < newGrid[0].length; j++) {
+      let pipeCount = 0
+      let currentSpace = newGrid[i][j]
+      if (currentSpace == 'P') {
+        console.log('P found')
+        let pipeOpen = true
+        let innerCount = 0
+        while (pipeOpen) {
+          console.log(j + 1 + innerCount)
+          let nextSpace = newGrid[i][j + 1 + innerCount]
+          if (nextSpace != 'P') {
+            // if (inn) newGrid[i][j + 1 + innerCount] = 'i'
+            innerCount++
+          } else if (nextSpace == 'P') {
+            pipeOpen = false
+            j = j + innerCount
+            innerSpaces = innerSpaces + innerCount
+          } else {
+          }
+        }
+      }
+    }
+  }
+  return [innerSpaces, newGrid]
+}
+
+// console.log(
+//   `Total moves to get around loop: ${totalMoves}\nFurthest point is: ${
+//     totalMoves / 2
+//   } moves away`
+// )
+
+function makeLoop(grid, y, x, startPipe, dir_y, dir_x) {
+  let location_x = x
+  let location_y = y
+  let currentPipe = startPipe
+  let moveCount = 0
+
+  // Start Looping
+  if (moveCount == 0) {
+    grid[location_y][location_x] = 'P'
+    if (startPipe == '|' || startPipe == 'J' || startPipe == '7') {
+      location_y++
+    } else if (startPipe == '-' || startPipe == 'L' || startPipe == 'F') {
+      location_x++
+    }
+    moveCount++
+  }
 
   do {
-    const difference = computeDifferences(rows[count])
-    rows.push(difference)
-    count++
-    console.log(`Differences: ${rows[count]}`)
-  } while (areAllDifferencesZero(rows[count]) == false)
-  //extrapolate
-  const extrapolatedRows = extrapolate(rows)
-  console.log(extrapolatedRows)
-  sumOfExtrapolatedHistories =
-    sumOfExtrapolatedHistories + extrapolatedRows[0][0]
-}
-console.log(`Sum of all extrapolated values: ${sumOfExtrapolatedHistories}`)
-
-function extrapolate(rows) {
-  const bottomRow = rows.length - 1
-  let extrapolatedValue
-  for (let i = bottomRow; i >= 0; i--) {
-    if (i == bottomRow) {
-      extrapolatedValue = 0
-    } else {
-      extrapolatedValue = parseInt(rows[i][0]) - parseInt(rows[i + 1][0])
+    currentPipe = grid[location_y][location_x]
+    console.log(currentPipe)
+    if (currentPipe == '|') {
+      grid[location_y][location_x] = 'P'
+      if (dir_y == 1) {
+        location_y--
+      } else if (dir_y == -1) {
+        location_y++
+      }
+    } else if (currentPipe == 'J') {
+      grid[location_y][location_x] = 'P'
+      if (dir_y == -1) {
+        location_x--
+        dir_y = 0
+        dir_x = -1
+      } else if (dir_x == 1) {
+        location_y--
+        dir_y = 1
+        dir_x = 0
+      }
+    } else if (currentPipe == 'L') {
+      grid[location_y][location_x] = 'P'
+      if (dir_y == -1) {
+        location_x++
+        dir_y = 0
+        dir_x = 1
+      } else if (dir_x == -1) {
+        location_y--
+        dir_y = 1
+        dir_x = 0
+      }
+    } else if (currentPipe == '-') {
+      grid[location_y][location_x] = 'P'
+      if (dir_x == -1) {
+        location_x--
+      } else if (dir_x == 1) {
+        location_x++
+      }
+    } else if (currentPipe == 'F') {
+      grid[location_y][location_x] = 'P'
+      if (dir_y == 1) {
+        location_x++
+        dir_y = 0
+        dir_x = 1
+      } else if (dir_x == -1) {
+        location_y++
+        dir_y = -1
+        dir_x = 0
+      }
+    } else if (currentPipe == '7') {
+      grid[location_y][location_x] = 'P'
+      if (dir_y == 1) {
+        location_x--
+        dir_y = 0
+        dir_x = -1
+      } else if (dir_x == 1) {
+        location_y++
+        dir_y = -1
+        dir_x = 0
+      }
     }
-    rows[i].unshift(extrapolatedValue)
-  }
-  return rows
+    console.log(`location x: ${location_x}, location y: ${location_y}`)
+    console.log(`x: ${x}, y: ${y}`)
+
+    //console.log(grid)
+
+    moveCount++
+  } while (location_x != x || location_y != y)
+  return grid
 }
 
-function areAllDifferencesZero(differences) {
-  for (let i = 0; i < differences.length; i++) {
-    if (differences[i] == '0') {
-      continue
-    } else {
-      return false
+function findStart(grid) {
+  for (let i = 0; i < grid.length; i++) {
+    for (let j = 0; j < grid[0].length; j++) {
+      if (grid[i][j] == 'S') {
+        return [i, j]
+      }
     }
   }
-  return true
 }
 
-function computeDifferences(history) {
-  const differences = []
-  for (let i = 0; i < history.length - 1; i++) {
-    differences.push(parseInt(history[i + 1]) - parseInt(history[i]))
+function determineStartPipe(grid, y, x) {
+  const down = grid[y + 1][x]
+  const left = grid[y][x - 1]
+  const right = grid[y][x + 1]
+  const up = grid[y - 1][x]
+
+  console.log(`Up: ${up}, left: ${left}, right: ${right}, down: ${down}`)
+
+  if (
+    (up == '|' || up == 'F' || up == '7') &&
+    (right == '-' || right == 'J' || right == '7')
+  ) {
+    return ['L', 0, 1]
+  } else if (
+    (up == '|' || up == 'F' || up == '7') &&
+    (left == '-' || left == 'L' || left == 'F')
+  ) {
+    return ['J', 0, 1]
+  } else if (
+    (up == '|' || up == 'F' || up == '7') &&
+    (down == '|' || down == 'L' || down == 'J')
+  ) {
+    return ['|', 0, 1]
+  } else if (
+    (right == '-' || right == 'J' || right == '7') &&
+    (down == '|' || down == 'L' || down == 'J')
+  ) {
+    return ['F', 1, 0]
+  } else if (
+    (left == '-' || left == 'F' || left == 'L') &&
+    (down == '|' || down == 'L' || down == 'J')
+  ) {
+    return ['7', 0, -1]
+  } else if (
+    (left == '-' || left == 'F' || left == 'L') &&
+    (right == '-' || right == 'J' || right == '7')
+  ) {
+    return ['-', 1, 0]
+  } else {
+    console.log('ERROR')
   }
-  return differences
+}
+
+function initializeGrid(data) {
+  const grid = []
+  for (let i = 0; i < dataset.length; i++) {
+    grid.push(dataset[i].split(''))
+  }
+  return grid
 }
