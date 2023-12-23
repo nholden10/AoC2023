@@ -11,5 +11,7 @@ const readInterface = readline.createInterface({
 })
 
 readInterface.on('line', function (line) {
-  const [gearLine, contiguousGroups] = line.split(' ')
+  const data = line.split(' ')
+  const gearLine = data[0].split('')
+  const contiguousGroups = data[1].split(',')
 })
