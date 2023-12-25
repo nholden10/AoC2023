@@ -1,12 +1,20 @@
 const fs = require('fs')
 
-const FILENAME = 'sample.txt'
+const FILENAME = 'day13input.txt'
 const data = fs.readFileSync(FILENAME, 'utf8')
 
 const grids = assembleGrids(data)
 
+let sum = 0
+
 for (let grid in grids) {
-  console.log(isVerticalSymmetry(grids[grid]))
+  console.log(`\n\nChecking for vertical symmetry of grid ${grid}\n`)
+  if (!isVerticalSymmetry(grids[grid])) {
+    console.log(
+      `No vertical symmetry found. Checking for horizontal symmetry of grid ${grid}\n`
+    )
+    isHorizontalSymmetry(grids[grid])
+  }
 }
 
 function assembleGrids(data) {
@@ -30,65 +38,91 @@ function assembleGrids(data) {
 }
 
 function isHorizontalSymmetry(grid) {
-  for (let row = 0; row < grid.length - 1; row++) {
+  let symmetry = false
+  // Loop 1: Searching column 0 to find initial symmetry
+  loop1: for (let row = 0; row < grid.length - 1; row++) {
     if (grid[row][0] == grid[row + 1][0]) {
-      console.log(
-        `Possible horizontal symmetry found between rows ${row} and ${row + 1}.\nChecking rest of column 0...`
-      )
-        if (checkColumnSymmetry(grid, col))
-        for (let col = 1; col < grid[row].length; col++){
-            if (checkCol)
+      // values match, check for symmetry around those rows for the rest of col 0
+      if (checkColumnSymmetry(grid, row, 0)) {
+        // symmetry found in col 0, check the rest of the columns
+        // Loop 2: searching the rest of the colums around the initial symmetry found at row and row+1
+        loop2: for (let col = 1; col < grid[row].length; col++) {
+          if (checkColumnSymmetry(grid, row, col)) {
+            // symmetry found for column, check next column.
+            continue loop2
+          } else {
+            continue loop1
+          }
         }
-        
-    } else {
-      continue
+        console.log(
+          `Horizontal symmetry found between rows ${row} and ${
+            row + 1
+          }. Adding ${(row + 1) * 100}.`
+        )
+        sum = sum + (row + 1) * 100
+        console.log(`Total sum is: ${sum}`)
+        return true
+        //check all colums
+      } else {
+        //no column symmetry around
+        continue loop1
+      }
     }
   }
+  console.log(`No symmetry found.`)
+  return false
 }
 
-function checkColumnSymmetry(grid, _colIndex) {
-    for (let i = 0; i < _rowData.length; i++) {
-        let column1 = _colIndex - i
-        let column2 = _colIndex + i + 1
-        if (_rowData[column1] == undefined || _rowData[column2] == undefined) {
-          console.log(`Row symmetry found...\nChecking next row...`)
-          return true
-        }
-    
-        if (_rowData[column1] == _rowData[column2]) {
-          console.log(`Symmetry found. Checking next columns...`)
-          continue
-        } else {
-          console.log(`No symmetry in row.`)
-          return false
-        }
-      }
+function checkColumnSymmetry(_grid, _rowIndex, _col) {
+  for (let i = 0; i < _grid.length; i++) {
+    let row1 = _rowIndex - i
+    let row2 = _rowIndex + i + 1
+    // console.log(`row1: ${row1}, row2: ${row2}, col: ${_col}`)
+    if (row1 < 0 || row2 == _grid.length) {
+      //   console.log(`Col symmetry found...\nChecking next of cols...\n\n`)
+      return true
+    }
+
+    if (_grid[row1][_col] == _grid[row2][_col]) {
+      //   console.log(`Symmetry found. Checking rest of column ${_col}...`)
+      continue
+    } else {
+      //   console.log(`No symmetry in col.`)
+      return false
+    }
+  }
 }
 
 function isVerticalSymmetry(grid) {
   //   console.log(grid)
   for (let col = 0; col < grid[0].length - 1; col++) {
     if (grid[0][col] == grid[0][col + 1]) {
-      console.log(
-        `Possible symmetry found between columns: ${col} and ${
-          col + 1
-        }.\nChecking rest of row 0.`
-      )
+      //   console.log(
+      //     `Possible symmetry found between columns: ${col} and ${
+      //       col + 1
+      //     }.\nChecking rest of row 0.\n\n`
+      //   )
       if (checkRowSymmetry(grid[0], col)) {
         for (let row = 1; row < grid.length; row++) {
           if (checkRowSymmetry(grid[row], col)) {
             continue
           } else {
-            console.log(`Lack of symmetry found in row ${row}`)
+            // console.log(`Lack of symmetry found in row ${row}`)
             return false
           }
         }
-        console.log(`Symmetry found between columns ${col} and ${col + 1}`)
+        console.log(
+          `Vertical symmetry found between columns ${col} and ${
+            col + 1
+          }. Adding ${col + 1}.`
+        )
+        sum = sum + col + 1
+        console.log(`Total sum is: ${sum}`)
         return true
         //
       }
     } else {
-      console.log(`No vertical symmetry found.`)
+      //   console.log(`No vertical symmetry found.`)
       continue
     }
   }
@@ -96,33 +130,20 @@ function isVerticalSymmetry(grid) {
   return false
 }
 
-// for each puzzle, check for vertical symmetry starting
-// with row 0, col x1, and col x2(starting with x1=0, x2=x1+1).
-
-// If symmetry found compare, x1-1 and x2+1. Continue until edge
-// of map.
-
-// If edge of map hit. Symmetry of row 0 is confirmed. Next move
-// to next row down and repeat process starting at the column
-// that symmetry was found at for row 0
-
-// If ever no symmetry, is found, exit funciton and move to
-// check Horizontal symmetry.
-
 function checkRowSymmetry(_rowData, _colIndex) {
   for (let i = 0; i < _rowData.length; i++) {
     let column1 = _colIndex - i
     let column2 = _colIndex + i + 1
-    if (_rowData[column1] == undefined || _rowData[column2] == undefined) {
-      console.log(`Row symmetry found...\nChecking next row...`)
+    if (column1 == -1 || column2 == _rowData.length) {
+      //   console.log(`Row symmetry found...\nChecking next row...`)
       return true
     }
 
     if (_rowData[column1] == _rowData[column2]) {
-      console.log(`Symmetry found. Checking next columns...`)
+      //   console.log(`Symmetry found. Checking next columns...`)
       continue
     } else {
-      console.log(`No symmetry in row.`)
+      //   console.log(`No symmetry in row.`)
       return false
     }
   }
