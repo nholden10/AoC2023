@@ -19,6 +19,33 @@ for (let grid in grids) {
   }
 }
 
+for (let grid in grids) {
+  for (let row = 0; row < grid.length; row++) {
+    for (let col = 0; col < grid.length; col++) {
+      grid[row][col] = swapSymbol(grid[row][col])
+      if (!isVerticalSymmetry(grids[grid])) {
+        console.log(`No vertical symmetry found.\n`)
+        isHorizontalSymmetry(grids[grid])
+      }
+      if (gridData[grid] == gridData[grid + grids.length]) {
+        console.log('Here!!!!!!!!!!')
+        grid[row][col] = swapSymbol(grid[row][col])
+        continue
+      }
+    }
+  }
+}
+
+function swapSymbol(value) {
+  let newVal
+  if (value == '.') {
+    newVal = '#'
+  } else {
+    newVal = '.'
+  }
+  return newVal
+}
+
 function assembleGrids(data) {
   const dataByRow = data.split('\n')
   const grids = {}
