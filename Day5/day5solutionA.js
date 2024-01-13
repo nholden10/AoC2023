@@ -4,36 +4,63 @@ const filename = 'sample.txt'
 const data = fs.readFileSync(filename, 'utf8')
 
 const lines = data.split(/\n/)
+const TOTAL_LINES = lines.length
 
-const seeds = lines[0].split(' ')
+let seeds = lines[0].split(' ')
 seeds.splice(0, 1)
-console.log(seeds)
-const totalLines = lines.length
-let lineCount = 3
-while (lineCount < totalLines) {
-  const currentLine = lines[lineCount]
-  if (currentLine.includes('map')) {
-    for (let i )
-    seeds = runMapping(seeds, currentLine)
-  } else if (currentLine == '') {
-    continue
-  } else if (currentLine == '') {
-    continue
+
+let lineCount = 2
+while (lineCount < TOTAL_LINES) {
+  console.log(lineCount)
+  const [mappings, offset] = getMaps(lineCount, lines)
+  seeds = runMappings(seeds, mappings)
+  console.log(`New Seeds: ${seeds}`)
+  lineCount = lineCount + offset + 1
+}
+console.log(`Lowest mapped number: ${Math.min(...seeds)}`)
+
+function getMaps(lineCount, lines) {
+  const mappings = []
+  let count = 1
+  // console.log(`lineCount: ${lineCount}, count: ${count}`)
+  while (
+    lineCount + count < TOTAL_LINES &&
+    lines[lineCount + count].length > 1
+  ) {
+    const currentMap = lines[lineCount + count]
+      .split(' ')
+      .map((item) => parseInt(item))
+    mappings.push(currentMap)
+    count++
   }
+  return [mappings, count]
 }
 
-function runMapping(seeds, line) {
+function runMappings(seeds, mappings) {
   const mappedSeeds = []
-  const [destinationRangeStart, sourceRangeStart, rangeLength] = line.split(' ')
-
-  for (let i = 0; i < seeds.length; i++) {
-    const seed = seeds[i]
-    if (seed >= sourceRangeStart && seed < sourceRangeStart + rangeLength) {
-      let newSeed = destinationRangeStart + (seed - sourceRangeStart) + 'm'
-      mappedSeeds.push(newSeed)
-    } else {
-      mappedSeed
+  SeedLoop: for (let seed in seeds) {
+    const currentSeed = parseInt(seeds[seed])
+    for (let map in mappings) {
+      const [destinationRangeStart, sourceRangeStart, rangeLength] =
+        mappings[map]
+      // console
+      //   .log
+      //   // `current Seed: ${currentSeed}\nsourceRangeStart: ${sourceRangeStart}, destinationRangeStart: ${destinationRangeStart}, range: ${rangeLength}`
+      //   ()
+      if (
+        currentSeed >= sourceRangeStart &&
+        currentSeed < sourceRangeStart + rangeLength
+      ) {
+        let newSeed = destinationRangeStart + (currentSeed - sourceRangeStart)
+        console.log(`In range, seed mapped to ${newSeed}`)
+        mappedSeeds.push(newSeed)
+        continue SeedLoop
+      } else {
+        continue
+      }
     }
+    mappedSeeds.push(currentSeed)
   }
+  console.log(`Seeds mapped to: ${seeds}`)
   return mappedSeeds
 }
